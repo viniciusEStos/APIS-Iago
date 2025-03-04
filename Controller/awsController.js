@@ -1,5 +1,6 @@
 const awsService = require('../Service/awsService.js');
 const fs = require('fs');
+const mime = require('mime-types');
 
 class awsController {
 
@@ -11,8 +12,8 @@ class awsController {
                 return res.status(400).json({ error: 'Nenhum arquivo foi enviado ou o nome do campo está incorreto' });
             }
 
-            const filePath = req.file.buffer; // Buffer do arquivo
-            const fileName = req.file.originalname; // Nome do arquivo original
+            const filePath = req.file.buffer;
+            const fileName = req.file.originalname; 
             const bucketName = 'bucketmi74';
 
             const result = await awsService.uploadImage(filePath, fileName, bucketName);
@@ -25,18 +26,23 @@ class awsController {
     }
 
     static async downloadImage(req, res) {
-        const { filePath } = req.body;
+        try {
+          const { keyName } = req.params;
+          const bucketName = 'bucketmi74';
 
-        const result = await awsService.downloadImage(filePath, 'bucketmi74');
-        const file = fs.createWriteStream(result);
-      
-        file.on('close', () => {
-          console.log('Arquivo baixado com sucesso:', file);
-          
-        }); 
-        const result1 = await awsService.getOne(keyName);
-          res.json(result1);
-      };
+          const file = await awsService.downloadFile(bucketName, keyName);
+    
+          const mimeType = mime.lookup(keyName) || 'application/octet-stream';
+
+          res.setHeader('Content-Type', mimeType);
+          res.setHeader('Content-Disposition', `attachment; filename=${keyName}`);
+          res.send(file); 
+        } catch (error) {
+          console.error('Erro ao processar o download:', error);
+ 
+          res.status(500).json({ error: 'Erro ao processar o download', message: error.message });
+        }
+      }
 
       static async getOne(req, res){
         const {keyName} = req.params;
