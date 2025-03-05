@@ -15,7 +15,23 @@ class awsService{
             return s3.upload(params).promise();
     }
 
-    static async downloadImage(params, file) {
+    static async downloadFile(bucketName, keyName) {
+        const params = {
+          Bucket: bucketName,
+          Key: keyName,
+        };
+
+        return new Promise((resolve, reject) => {
+          const fileStream = s3.getObject(params).createReadStream();
+    
+          let data = [];
+          fileStream.on('data', (chunk) => data.push(chunk));
+          fileStream.on('end', () => resolve(Buffer.concat(data)));
+          fileStream.on('error', (err) => reject(err));
+        });
+    }
+
+      static async downloadImage(params, file) {
         s3.getObject(params).createReadStream().pipe(file);
     }
 
