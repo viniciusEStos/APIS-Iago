@@ -6,8 +6,8 @@ const { v4: uuidv4 } = require('uuid');
 // Configuração do AWS S3
 AWS.config.update({
     region: 'us-west-1',
-    accessKeyId: 'AKIA5RRHCKYZ3ZDRWAA6',
-    secretAccessKey: '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'
+    accessKeyId: '',
+    secretAccessKey: ''
 });
 
 const s3 = new AWS.S3(); // Instancia o serviço S3
